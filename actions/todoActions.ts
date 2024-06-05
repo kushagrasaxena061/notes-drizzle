@@ -3,45 +3,46 @@ import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 import db from "@/db/drizzle";
-import { todo } from "@/db/schema";
+import { todos } from "@/db/schema";
 
-export const getData = async () => {
-  const data = await db.select().from(todo);
+export const getData = async (userId: number) => {
+  const data = await db.select().from(todos).where(eq(todos?.userId, userId));
   return data;
 };
 
-export const addTodo = async (id: number, text: string) => {
-  await db.insert(todo).values({
+export const addTodo = async (id: number, text: string, userId: number) => {
+  await db.insert(todos).values({
     id,
     text: text,
+    userId,
   });
   revalidatePath("/");
 };
 
 export const deleteTodo = async (id: number) => {
-  await db.delete(todo).where(eq(todo.id, id));
+  await db.delete(todos).where(eq(todos.id, id));
 
   revalidatePath("/");
 };
 
 export const toggleTodo = async (id: number, done: boolean) => {
   await db
-    .update(todo)
+    .update(todos)
     .set({
       done: done,
     })
-    .where(eq(todo.id, id));
+    .where(eq(todos.id, id));
 
   revalidatePath("/");
 };
 
 export const editTodo = async (id: number, text: string) => {
   await db
-    .update(todo)
+    .update(todos)
     .set({
       text: text,
     })
-    .where(eq(todo.id, id));
+    .where(eq(todos.id, id));
 
   revalidatePath("/");
 };
